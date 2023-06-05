@@ -32,5 +32,8 @@ if __name__ == '__main__':
     
     TOKEN = env('DVMN_TOKEN')
     while True:
-        new_reviews = make_long_poll(TOKEN)
-        print(new_reviews)
+        try:
+            new_reviews = make_long_poll(TOKEN)
+            print(new_reviews)
+        except requests.exceptions.ReadTimeout:
+            continue
