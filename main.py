@@ -31,4 +31,6 @@ if __name__ == '__main__':
     env.read_env()
     
     TOKEN = env('DVMN_TOKEN')
-    print(make_long_poll(TOKEN))
+    while True:
+        new_reviews = make_long_poll(TOKEN)
+        print(new_reviews)
