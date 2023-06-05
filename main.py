@@ -1,17 +1,25 @@
 import requests
+from time import sleep
 
 from environs import Env
 
 
 def get_response(url, token):
-    response = requests.get(
-        url, 
-        headers = {
-            'Authorization': f'Token {token}'
-        }
-    )
-    response.raise_for_status()
-    return response.json()
+    try:
+        response = requests.get(
+            url, 
+            headers = {
+                'Authorization': f'Token {token}'
+            },
+            timeout = 10
+        )
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.ReadTimeout:
+        return None
+    except requests.exceptions.ConnectionError:
+        sleep(10)
+        return None
     
     
 def check_reviews(token):
@@ -32,8 +40,6 @@ if __name__ == '__main__':
     
     TOKEN = env('DVMN_TOKEN')
     while True:
-        try:
-            new_reviews = make_long_poll(TOKEN)
+        new_reviews = make_long_poll(TOKEN)
+        if new_reviews:
             print(new_reviews)
-        except requests.exceptions.ReadTimeout:
-            continue
