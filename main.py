@@ -50,8 +50,19 @@ if __name__ == '__main__':
     while True:
         new_reviews = make_long_poll(dvmn_token, params)
         print(new_reviews)
-        bot.send_message(chat_id=chat_id, text=json.dumps(new_reviews))
+
         if new_reviews.get('timestamp_to_request'):
             params['timestamp'] = new_reviews.get('timestamp_to_request')
         elif new_reviews.get('last_attempt_timestamp'):
             params['timestamp'] = new_reviews.get('last_attempt_timestamp')
+
+        if new_reviews.get('status') == 'found':
+            attempts = new_reviews.get('new_attempts')
+            for attempt in attempts:
+                title = attempt.get('lesson_title')
+                status = 'обнаружены ошибки' if attempt.get('is_negative') else 'работа принята'
+                url = attempt.get('lesson_url')
+                
+                message = f'Урок "{title}" проверен, результат - {status}.\nСсылка на урок - {url}'
+
+                bot.send_message(chat_id=chat_id, text=message)
