@@ -1,4 +1,4 @@
-# Space Pictures To Telegram
+# Devman Notification Bot
 
 ## About
 
