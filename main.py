@@ -1,6 +1,8 @@
 import requests
+import json
 from time import sleep
 
+import telegram
 from environs import Env
 
 
@@ -38,11 +40,17 @@ if __name__ == '__main__':
     env = Env()
     env.read_env()
     
-    TOKEN = env('DVMN_TOKEN')
+    dvmn_token = env('DVMN_TOKEN')
+    tg_api_token = env('TG_API_TOKEN')
+    chat_id = env('CHAT_ID')
+    
+    bot = telegram.Bot(token=tg_api_token)
+    
     params = {}
     while True:
-        new_reviews = make_long_poll(TOKEN, params)
+        new_reviews = make_long_poll(dvmn_token, params)
         print(new_reviews)
+        bot.send_message(chat_id=chat_id, text=json.dumps(new_reviews))
         if new_reviews.get('timestamp_to_request'):
             params['timestamp'] = new_reviews.get('timestamp_to_request')
         elif new_reviews.get('last_attempt_timestamp'):
