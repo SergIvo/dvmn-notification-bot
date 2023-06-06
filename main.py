@@ -9,8 +9,8 @@ def check_reviews(token, params=None):
     url = 'https://dvmn.org/api/long_polling/'
     try:
         response = requests.get(
-            url, 
-            headers = {
+            url,
+            headers={
                 'Authorization': f'Token {token}'
             },
             params=params
@@ -35,29 +35,31 @@ def get_timestamp(new_reviews):
 
 def send_notifications(bot, new_reviews):
     attempts = new_reviews.get('new_attempts')
-        for attempt in attempts:
-            title = attempt.get('lesson_title')
-            status = 'обнаружены ошибки' if attempt.get('is_negative') else 'работа принята'
-            url = attempt.get('lesson_url')
+    for attempt in attempts:
+        title = attempt.get('lesson_title')
+        if attempt.get('is_negative'):
+            status = 'В работе обнаружены ошибки'
+        else:
+            status = 'Работа принята'
+        url = attempt.get('lesson_url')
 
-            message = f'Урок "{title}" проверен, результат - {status}.\nСсылка на урок - {url}'
-            bot.send_message(chat_id=chat_id, text=message)
+        message = f'Урок "{title}" проверен. {status}.\nСсылка на урок - {url}'
+        bot.send_message(chat_id=chat_id, text=message)
 
 
 if __name__ == '__main__':
     env = Env()
     env.read_env()
-    
+
     dvmn_token = env('DVMN_TOKEN')
     tg_api_token = env('TG_API_TOKEN')
     chat_id = env('CHAT_ID')
-    
+
     bot = telegram.Bot(token=tg_api_token)
-    
+
     params = {'timestamp': None}
     while True:
         new_reviews = check_reviews(dvmn_token, params)
-        print(new_reviews)
 
         params['timestamp'] = get_timestamp(new_reviews)
         if new_reviews.get('status') == 'found':
