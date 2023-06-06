@@ -1,12 +1,12 @@
 import requests
-import json
 from time import sleep
 
 import telegram
 from environs import Env
 
 
-def get_response(url, token, params):
+def check_reviews(token, params=None):
+    url = 'https://dvmn.org/api/long_polling/'
     try:
         response = requests.get(
             url, 
@@ -22,18 +22,6 @@ def get_response(url, token, params):
     except requests.exceptions.ConnectionError:
         sleep(10)
         return None
-    
-    
-def check_reviews(token, params=None):
-    url = 'https://dvmn.org/api/user_reviews/'
-    reviews = get_response(url, token, params)
-    return reviews
-
-
-def make_long_poll(token, params=None):
-    url = 'https://dvmn.org/api/long_polling/'
-    reviews = get_response(url, token, params)
-    return reviews
 
 
 if __name__ == '__main__':
