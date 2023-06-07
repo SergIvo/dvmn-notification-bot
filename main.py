@@ -7,21 +7,15 @@ from environs import Env
 
 def fetch_reviews_from_api(token, params=None):
     url = 'https://dvmn.org/api/long_polling/'
-    try:
-        response = requests.get(
-            url,
-            headers={
-                'Authorization': f'Token {token}'
-            },
-            params=params
-        )
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.ReadTimeout:
-        return None
-    except requests.exceptions.ConnectionError:
-        sleep(10)
-        return None
+    response = requests.get(
+        url,
+        headers={
+            'Authorization': f'Token {token}'
+        },
+        params=params
+    )
+    response.raise_for_status()
+    return response.json()
 
 
 def send_notifications(bot, new_reviews):
@@ -50,7 +44,13 @@ if __name__ == '__main__':
 
     params = {'timestamp': None}
     while True:
-        new_reviews = fetch_reviews_from_api(dvmn_token, params)
+        try:
+            new_reviews = fetch_reviews_from_api(dvmn_token, params)
+        except requests.exceptions.ReadTimeout:
+            continue
+        except requests.exceptions.ConnectionError:
+            sleep(10)
+            continue
 
         if not new_reviews:
             continue
