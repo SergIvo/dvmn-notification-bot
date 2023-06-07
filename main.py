@@ -5,7 +5,7 @@ import telegram
 from environs import Env
 
 
-def check_reviews(token, params=None):
+def fetch_reviews_from_api(token, params=None):
     url = 'https://dvmn.org/api/long_polling/'
     try:
         response = requests.get(
@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
     params = {'timestamp': None}
     while True:
-        new_reviews = check_reviews(dvmn_token, params)
+        new_reviews = fetch_reviews_from_api(dvmn_token, params)
 
         params['timestamp'] = get_timestamp(new_reviews)
         if new_reviews.get('status') == 'found':
