@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
     dvmn_token = env('DVMN_TOKEN')
     tg_api_token = env('TG_API_TOKEN')
-    chat_id = env('CHAT_ID')
+    chat_id = env('TG_CHAT_ID')
 
     bot = telegram.Bot(token=tg_api_token)
 

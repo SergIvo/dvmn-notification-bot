@@ -24,7 +24,7 @@ pip install -r requirements.txt
 ```
 export DVMN_TOKEN="your Devman API key"
 export TG_API_KEY="your Telegram API key"
-export CHAT_ID="id of your Telegram chat with your bot"
+export TG_CHAT_ID="id of your Telegram chat with your bot"
 ```
 
 To make environment variable management easier, you can create [.env](https://pypi.org/project/python-dotenv/#getting-started) file and store all variables in it. 
