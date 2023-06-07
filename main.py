@@ -24,15 +24,6 @@ def fetch_reviews_from_api(token, params=None):
         return None
 
 
-def get_timestamp(new_reviews):
-    if new_reviews.get('timestamp_to_request'):
-        return new_reviews.get('timestamp_to_request')
-    elif new_reviews.get('last_attempt_timestamp'):
-        return new_reviews.get('last_attempt_timestamp')
-    else:
-        return None
-
-
 def send_notifications(bot, new_reviews):
     attempts = new_reviews.get('new_attempts')
     for attempt in attempts:
@@ -61,6 +52,13 @@ if __name__ == '__main__':
     while True:
         new_reviews = fetch_reviews_from_api(dvmn_token, params)
 
-        params['timestamp'] = get_timestamp(new_reviews)
+        if not new_reviews:
+            continue
+
+        if new_reviews.get('timestamp_to_request'):
+            params['timestamp'] = new_reviews.get('timestamp_to_request')
+        elif new_reviews.get('last_attempt_timestamp'):
+            params['timestamp'] = new_reviews.get('last_attempt_timestamp')
+
         if new_reviews.get('status') == 'found':
             send_notifications(bot, new_reviews)
