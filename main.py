@@ -1,6 +1,7 @@
-import requests
+import logging
 from time import sleep
 
+import requests
 import telegram
 from environs import Env
 
@@ -41,6 +42,9 @@ if __name__ == '__main__':
     chat_id = env('TG_CHAT_ID')
 
     bot = telegram.Bot(token=tg_api_token)
+
+    logging.basicConfig(level=logging.DEBUG)
+    logging.info('Bot started')
 
     params = {'timestamp': None}
     while True:
