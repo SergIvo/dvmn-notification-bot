@@ -6,6 +6,20 @@ import telegram
 from environs import Env
 
 
+class TgLogsHandler(logging.Handler):
+    def __init__(self, tg_api_token, tg_chat_id):
+        super().__init__()
+        self.bot = telegram.Bot(token=tg_api_token)
+        self.chat_id = tg_chat_id
+
+    def emit(self, record):
+        log_entry = self.format(record)
+        self.bot.send_message(
+            chat_id=self.chat_id,
+            text=log_entry
+        )
+
+
 def fetch_reviews_from_api(token, params=None):
     url = 'https://dvmn.org/api/long_polling/'
     response = requests.get(
@@ -33,18 +47,27 @@ def send_notifications(bot, new_reviews):
         bot.send_message(chat_id=chat_id, text=message)
 
 
-class TgLogsHandler(logging.Handler):
-    def __init__(self, tg_api_token, tg_chat_id):
-        super().__init__()
-        self.bot = telegram.Bot(token=tg_api_token)
-        self.chat_id = tg_chat_id
+def run_bot_main_loop(bot, dvmn_token):
+    params = {'timestamp': None}
+    while True:
+        try:
+            new_reviews = fetch_reviews_from_api(dvmn_token, params)
+        except requests.exceptions.ReadTimeout:
+            continue
+        except requests.exceptions.ConnectionError:
+            sleep(10)
+            continue
 
-    def emit(self, record):
-        log_entry = self.format(record)
-        self.bot.send_message(
-            chat_id=self.chat_id,
-            text=log_entry
-        )
+        if not new_reviews:
+            continue
+
+        if new_reviews.get('timestamp_to_request'):
+            params['timestamp'] = new_reviews.get('timestamp_to_request')
+        elif new_reviews.get('last_attempt_timestamp'):
+            params['timestamp'] = new_reviews.get('last_attempt_timestamp')
+
+        if new_reviews.get('status') == 'found':
+            send_notifications(bot, new_reviews)
 
 
 if __name__ == '__main__':
@@ -67,23 +90,8 @@ if __name__ == '__main__':
     logger.addHandler(handler)
     logger.info('Bot started')
 
-    params = {'timestamp': None}
     while True:
         try:
-            new_reviews = fetch_reviews_from_api(dvmn_token, params)
-        except requests.exceptions.ReadTimeout:
-            continue
-        except requests.exceptions.ConnectionError:
-            sleep(10)
-            continue
-
-        if not new_reviews:
-            continue
-
-        if new_reviews.get('timestamp_to_request'):
-            params['timestamp'] = new_reviews.get('timestamp_to_request')
-        elif new_reviews.get('last_attempt_timestamp'):
-            params['timestamp'] = new_reviews.get('last_attempt_timestamp')
-
-        if new_reviews.get('status') == 'found':
-            send_notifications(bot, new_reviews)
+            run_bot_main_loop(bot, dvmn_token)
+        except Exception as ex:
+            logger.exception(ex)
