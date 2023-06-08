@@ -33,6 +33,20 @@ def send_notifications(bot, new_reviews):
         bot.send_message(chat_id=chat_id, text=message)
 
 
+class TgLogsHandler(logging.Handler):
+    def __init__(self, tg_api_token, tg_chat_id):
+        super().__init__()
+        self.bot = telegram.Bot(token=tg_api_token)
+        self.chat_id = tg_chat_id
+
+    def emit(self, record):
+        log_entry = self.format(record)
+        self.bot.send_message(
+            chat_id=self.chat_id,
+            text=log_entry
+        )
+
+
 if __name__ == '__main__':
     env = Env()
     env.read_env()
@@ -43,8 +57,15 @@ if __name__ == '__main__':
 
     bot = telegram.Bot(token=tg_api_token)
 
-    logging.basicConfig(level=logging.DEBUG)
-    logging.info('Bot started')
+    handler = TgLogsHandler(tg_api_token, chat_id)
+    handler.setFormatter(
+        logging.Formatter('%(process)d %(levelname)s %(message)s')
+    )
+
+    logger = logging.getLogger('notification-bot')
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(handler)
+    logger.info('Bot started')
 
     params = {'timestamp': None}
     while True:
