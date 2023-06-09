@@ -5,6 +5,8 @@ import requests
 import telegram
 from environs import Env
 
+logger = logging.getLogger('notification-bot')
+
 
 class TgLogsHandler(logging.Handler):
     def __init__(self, tg_api_token, tg_chat_id):
@@ -85,7 +87,6 @@ if __name__ == '__main__':
         logging.Formatter('%(process)d %(levelname)s %(message)s')
     )
 
-    logger = logging.getLogger('notification-bot')
     logger.setLevel(logging.DEBUG)
     logger.addHandler(handler)
     logger.info('Bot started')
