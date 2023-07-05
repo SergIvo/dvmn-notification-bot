@@ -34,3 +34,25 @@ To make environment variable management easier, you can create [.env](https://py
 python main.py
 ```
 Bot will constantly make requests to Devman API and send notifications to Telegram chat if any new reviews will occure.
+
+## Running application in Docker container
+
+To run application in Docker, you should first create Docker image with this application by following command:
+```
+docker build -t notification_bot .
+```
+
+This will create image with name `notification_bot` and tag `latest`. You can see it in the list of Docker images by executing command `docker images`
+
+For convinience, list all your environment variables in the [.env](https://pypi.org/project/python-dotenv/#getting-started) file, in `KEY=VALUE` format, like this:
+```
+DVMN_TOKEN=your_Devman_API_key
+TG_API_KEY=your_Telegram_API_key
+TG_CHAT_ID=id_of_your_Telegram_chat_with_your_bot
+```
+After that, execute the following command to create Docker container with name `notification_bot`:
+```
+docker run --name notification_bot --env-file ./.env -d notification_bot:latest
+```
+
+Now you can find your container in the list of existing containers by executing command `docker ps -a`
