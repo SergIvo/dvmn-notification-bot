@@ -52,7 +52,7 @@ TG_CHAT_ID=id_of_your_Telegram_chat_with_your_bot
 ```
 After that, execute the following command to create Docker container with name `notification_bot`:
 ```
-docker run --name notification_bot --env-file ./.env -d notification_bot:latest
+docker run --name notification_bot --restart=always --env-file ./.env -d notification_bot:latest
 ```
 
 Now you can find your container in the list of existing containers by executing command `docker ps -a`
